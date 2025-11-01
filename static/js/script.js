@@ -639,6 +639,62 @@ function generarRespuestaBuildsCompletas() {
     return respuesta;
 }
 
+function esDespedida(mensaje) {
+    const mensaje_lower = mensaje.toLowerCase().trim();
+    const despedidas = [
+        "adiós", "adios", "adiós", "hasta luego", "hasta pronto", "nos vemos", 
+        "chao", "chau", "bye", "hasta la vista", "que tengas buen día",
+        "que tengas buena tarde", "que tengas buena noche", "nos vemos luego",
+        "hasta mañana", "hasta después", "saludos", "me voy", "me retiro"
+    ];
+    
+    return despedidas.some(despedida => mensaje_lower.includes(despedida) || mensaje_lower === despedida);
+}
+
+function esPregunta(mensaje) {
+    const mensaje_trim = mensaje.trim();
+    // Verificar si termina en signo de interrogación
+    if (mensaje_trim.endsWith('?') || mensaje_trim.endsWith('¿')) {
+        return true;
+    }
+    
+    const mensaje_lower = mensaje_trim.toLowerCase();
+    // Palabras que indican pregunta
+    const palabras_pregunta = [
+        "qué", "que", "cuál", "cual", "cuáles", "cuales", "cómo", "como",
+        "cuándo", "cuando", "dónde", "donde", "por qué", "porque", "porque",
+        "cuánto", "cuanto", "cuántos", "cuantos", "cuántas", "cuantas",
+        "puedes", "puede", "podrías", "podría", "me puedes", "me podrías",
+        "dime", "decime", "explícame", "explicame", "ayúdame", "ayudame"
+    ];
+    
+    // Verificar si empieza con palabra de pregunta o contiene "qué es", "cuál es", etc.
+    const inicio_pregunta = palabras_pregunta.some(palabra => 
+        mensaje_lower.startsWith(palabra + " ") || 
+        mensaje_lower.startsWith(palabra)
+    );
+    
+    const contiene_pregunta = mensaje_lower.includes("qué es") || 
+                              mensaje_lower.includes("que es") ||
+                              mensaje_lower.includes("cuál es") ||
+                              mensaje_lower.includes("cual es") ||
+                              mensaje_lower.includes("qué son") ||
+                              mensaje_lower.includes("que son");
+    
+    return inicio_pregunta || contiene_pregunta;
+}
+
+function obtenerRespuestaDespedida() {
+    const hora = new Date().getHours();
+    if (hora >= 6 && hora < 12) {
+        return "¡Hasta luego! Que tengas un excelente día. Recuerda que estoy aquí cuando necesites recomendaciones sobre piezas de PC. 😊";
+    } else if (hora >= 12 && hora < 20) {
+        return "¡Hasta luego! Que tengas una excelente tarde. Si necesitas más ayuda con componentes de PC, aquí estaré. 😊";
+    } else {
+        return "¡Hasta luego! Que tengas una excelente noche. Estaré aquí cuando quieras armar tu PC o buscar componentes. 😊";
+    }
+}
+
 function procesarMensaje(mensajeUsuario) {
     const mensaje = mensajeUsuario.trim();
     
@@ -647,6 +703,11 @@ function procesarMensaje(mensajeUsuario) {
     }
     
     const mensaje_lower = mensaje.toLowerCase();
+    
+    // Detectar despedidas primero
+    if (esDespedida(mensaje)) {
+        return obtenerRespuestaDespedida();
+    }
     
     // Saludos iniciales con reconocimiento de hora
     if (["hola", "hi", "saludos"].some(palabra => mensaje_lower.includes(palabra)) || 
@@ -660,6 +721,11 @@ function procesarMensaje(mensajeUsuario) {
     // Detectar si pregunta por armar una PC
     if (mensaje_lower.includes("armar") && (mensaje_lower.includes("pc") || mensaje_lower.includes("computadora") || mensaje_lower.includes("computador"))) {
         return generarRespuestaBuildsCompletas();
+    }
+    
+    // Si es una pregunta genérica sin contexto, ofrecer ayuda
+    if (esPregunta(mensaje) && !detectarTipoPieza(mensaje)) {
+        return "Veo que tienes una pregunta. ¿Sobre qué componente de PC te gustaría saber? Puedo ayudarte con:\n\n• Procesadores (CPU)\n• Tarjetas gráficas (GPU)\n• RAM\n• Fuentes de alimentación\n• Placas base\n• Almacenamiento\n\nTambién puedo ayudarte a armar una PC completa. Solo dime qué necesitas.";
     }
     
     // Verificar si menciona piezas no recomendadas
