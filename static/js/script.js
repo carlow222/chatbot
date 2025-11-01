@@ -310,7 +310,19 @@ const PC_BUILDS = {
 };
 
 // Función para obtener saludo según la hora del día
-function obtenerSaludo() {
+function obtenerSaludo(mensaje = "") {
+    const mensaje_lower = mensaje.toLowerCase();
+    
+    // Si el mensaje menciona específicamente una hora del día, usarla
+    if (mensaje_lower.includes("buenas tardes") || mensaje_lower.includes("buena tarde")) {
+        return "¡Buenas tardes!";
+    } else if (mensaje_lower.includes("buenas noches") || mensaje_lower.includes("buena noche")) {
+        return "¡Buenas noches!";
+    } else if (mensaje_lower.includes("buenos días") || mensaje_lower.includes("buen día")) {
+        return "¡Buenos días!";
+    }
+    
+    // Si no, usar la hora del sistema
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) {
         return "¡Buenos días!";
@@ -684,6 +696,39 @@ function esPregunta(mensaje) {
     return inicio_pregunta || contiene_pregunta;
 }
 
+function esSobreComputadoras(mensaje) {
+    const mensaje_lower = mensaje.toLowerCase();
+    
+    // Palabras clave relacionadas con computadoras/PC
+    const palabras_computadora = [
+        "procesador", "cpu", "procesadores", "ryzen", "intel", "amd",
+        "tarjeta gráfica", "gpu", "rtx", "gtx", "rx", "graphics", "video",
+        "ram", "memoria", "ddr4", "ddr5",
+        "fuente", "psu", "alimentación", "power supply",
+        "placa base", "motherboard", "mobo", "placa madre",
+        "disco", "ssd", "nvme", "hdd", "almacenamiento", "hard drive",
+        "pc", "computadora", "computador", "ordenador", "laptop", "notebook",
+        "gaming", "gabinete", "case", "cooler", "ventilador", "fan",
+        "armar", "build", "ensamblar", "montar", "componente", "pieza",
+        "marca", "nvidia", "corsair", "kingston", "samsung", "wd", "seagate"
+    ];
+    
+    return palabras_computadora.some(palabra => mensaje_lower.includes(palabra));
+}
+
+function obtenerContextoMarcas(tipoPieza) {
+    const contexto = {
+        "procesadores": "**Nota sobre marcas:** AMD suele tener mejor relación calidad-precio y multitarea, mientras Intel destaca en single-core y gaming. Ambos son excelentes opciones según tus necesidades.",
+        "tarjetas_graficas": "**Nota sobre marcas:** NVIDIA ofrece mejor ray tracing y DLSS, ideal para gaming. AMD tiene mejor precio-rendimiento y más VRAM. Ambas son buenas según tu presupuesto.",
+        "ram": "**Nota sobre marcas:** Corsair y G.Skill son líderes en gaming. Kingston y Crucial ofrecen buena relación calidad-precio. La velocidad depende de tu motherboard.",
+        "almacenamiento": "**Nota sobre marcas:** Samsung lidera en velocidad y confiabilidad. WD y Kingston ofrecen buen precio. Samsung es premium, WD es equilibrado.",
+        "fuentes_alimentacion": "**Nota sobre marcas:** Corsair, EVGA y Seasonic son las más confiables. Evita marcas genéricas. Certificación 80+ Gold es ideal, Bronze es aceptable.",
+        "placas_base": "**Nota sobre marcas:** ASUS y MSI lideran en gaming. Gigabyte ofrece buena relación precio-calidad. ASRock es económica. Todas son confiables."
+    };
+    
+    return contexto[tipoPieza] || "";
+}
+
 function obtenerRespuestaDespedida() {
     const hora = new Date().getHours();
     if (hora >= 6 && hora < 12) {
@@ -714,7 +759,7 @@ function procesarMensaje(mensajeUsuario) {
         mensaje_lower.includes("buenos días") || mensaje_lower.includes("buenas tardes") || 
         mensaje_lower.includes("buenas noches") || mensaje_lower.includes("buen día") ||
         mensaje_lower.includes("buena tarde") || mensaje_lower.includes("buena noche")) {
-        const saludo = obtenerSaludo();
+        const saludo = obtenerSaludo(mensaje);
         return `${saludo} ${INTRO_MESSAGE}\n\n¿En qué puedo ayudarte hoy? Puedo recomendarte piezas individuales o ayudarte a armar una PC completa.`;
     }
     
@@ -723,9 +768,19 @@ function procesarMensaje(mensajeUsuario) {
         return generarRespuestaBuildsCompletas();
     }
     
-    // Si es una pregunta genérica sin contexto, ofrecer ayuda
+    // Si es una pregunta genérica sin contexto
     if (esPregunta(mensaje) && !detectarTipoPieza(mensaje)) {
-        return "Veo que tienes una pregunta. ¿Sobre qué componente de PC te gustaría saber? Puedo ayudarte con:\n\n• Procesadores (CPU)\n• Tarjetas gráficas (GPU)\n• RAM\n• Fuentes de alimentación\n• Placas base\n• Almacenamiento\n\nTambién puedo ayudarte a armar una PC completa. Solo dime qué necesitas.";
+        // Verificar si la pregunta es sobre computadoras
+        if (!esSobreComputadoras(mensaje)) {
+            return "Lo siento, pero solo puedo ayudarte con preguntas relacionadas con computadoras y componentes de PC.\n\nSoy Megafort, especializado en:\n• Piezas de computadora\n• Builds de PC\n• Recomendaciones de componentes\n• Comparaciones de hardware\n\nSi tienes alguna pregunta sobre estos temas, estaré encantado de ayudarte. 😊";
+        }
+        // Si es sobre computadoras pero no detecta pieza específica
+        return "Veo que tienes una pregunta sobre PC. ¿Sobre qué componente te gustaría saber? Puedo ayudarte con:\n\n• Procesadores (CPU)\n• Tarjetas gráficas (GPU)\n• RAM\n• Fuentes de alimentación\n• Placas base\n• Almacenamiento\n\nTambién puedo ayudarte a armar una PC completa. Solo dime qué necesitas.";
+    }
+    
+    // Si el mensaje no es pregunta pero tampoco es sobre computadoras
+    if (!esSobreComputadoras(mensaje) && !esDespedida(mensaje)) {
+        return "Lo siento, solo puedo ayudarte con temas relacionados con computadoras y componentes de PC.\n\nPuedo asistirte con:\n• Recomendaciones de piezas\n• Builds completas de PC\n• Comparaciones de componentes\n• Consejos sobre hardware\n\n¿Hay algo específico sobre computadoras en lo que pueda ayudarte?";
     }
     
     // Verificar si menciona piezas no recomendadas
@@ -765,6 +820,12 @@ function procesarMensaje(mensajeUsuario) {
     }
     
     let respuesta = formatearRespuestaPiezas(piezas, tipoPieza);
+    
+    // Agregar contexto sobre marcas
+    const contextoMarcas = obtenerContextoMarcas(tipoPieza);
+    if (contextoMarcas) {
+        respuesta += `\n\n${contextoMarcas}`;
+    }
     
     // Agregar contexto según el uso detectado
     const uso = detectarUso(mensaje);
