@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot de Piezas de Computadora</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Asesor de Piezas de Computadora</h1>
+            <p class="subtitle">Sistema de recomendación avanzado | Análisis en tiempo real</p>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <strong>Megafort</strong>
+                        </div>
+                        <p id="introMessage">¡Hola! Soy Megafort, tu asistente personal en todo lo relacionado con piezas de computadoras. Si estás buscando las mejores piezas para tu PC, las opciones más asequibles o incluso si quieres evitar algunas malas elecciones, ¡estoy aquí para ayudarte!</p>
+                        <p>¿Qué pieza necesitas? Puedes preguntar sobre procesadores, tarjetas gráficas, RAM, fuentes de alimentación, placas base o almacenamiento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Escribe tu pregunta aquí..." 
+                        autocomplete="off"
+                    >
+                    <button id="sendButton" title="Enviar mensaje">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="suggestions">
+            <p class="suggestions-title">Preguntas sugeridas:</p>
+            <div class="suggestion-buttons">
+                <button class="suggestion-btn" data-query="armar una PC">Armar una PC</button>
+                <button class="suggestion-btn" data-query="procesador para gaming económico">Procesador gaming económico</button>
+                <button class="suggestion-btn" data-query="mejor tarjeta gráfica">Mejor tarjeta gráfica</button>
+                <button class="suggestion-btn" data-query="RAM para PC gaming">RAM para gaming</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/script.js"></script>
+</body>
+</html>
+
